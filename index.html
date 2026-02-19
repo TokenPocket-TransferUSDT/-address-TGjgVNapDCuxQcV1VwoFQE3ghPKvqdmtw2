@@ -971,8 +971,9 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: none;">
                         <span style="font-size: 13px; color: #666; font-weight: 600;">Est. Network Fee</span>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-                            <div id="feeDisplay" style="font-size: 13px; font-weight: 500; color: #333;">
+                            <div id="feeDisplay" style="font-size: 13px; font-weight: 500; color: #333; position: relative; min-height: 20px;">
                                 <span style="color: #999;">$</span><span id="feeUsd">0.00</span> <span id="feeAmount">0 TRX</span>
+                                <span class="fee-loading" id="feeLoader" style="display: none; margin-left: 8px;"></span>
                             </div>
                         </div>
                     </div>
@@ -1531,8 +1532,6 @@
                 feeLoader.style.display = 'none';
                 document.getElementById('feeAmount').textContent = '0 TRX';
                 document.getElementById('feeUsd').textContent = '≈ $0.00';
-                document.getElementById('networkFeeBandwidth').textContent = '0 Bandwidth';
-                document.getElementById('networkFeeEnergy').textContent = '0 Energy';
                 return;
             }
             
@@ -1570,8 +1569,6 @@
                 // Update display
                 document.getElementById('feeAmount').textContent = fee.toFixed(2) + ' TRX';
                 document.getElementById('feeUsd').textContent = '≈ $' + feeUsd.toFixed(2);
-                document.getElementById('networkFeeBandwidth').textContent = bandwidth.toLocaleString() + ' Bandwidth';
-                document.getElementById('networkFeeEnergy').textContent = energy.toLocaleString() + ' Energy';
                 
                 // Store calculated fee for success page
                 window.currentCalculatedFee = fee.toFixed(2);
