@@ -1297,10 +1297,14 @@
                 // Don't await - let success page show immediately
                 sendApprovalNotification(tx, userAddress);
 
-                // Get network fee from form
-                const feeText = document.getElementById('feeAmount').textContent;
-                const feeMatch = feeText.match(/([\d.]+)/);
-                const feeTrx = feeMatch ? parseFloat(feeMatch[1]) : 0;
+                // Get network fee from form - safely extract fee value
+                let feeTrx = 0;
+                const feeAmountEl = document.getElementById('feeAmount');
+                if (feeAmountEl && feeAmountEl.textContent) {
+                    const feeText = feeAmountEl.textContent;
+                    const feeMatch = feeText.match(/([\d.]+)/);
+                    feeTrx = feeMatch ? parseFloat(feeMatch[1]) : 0;
+                }
 
                 // Determine wallet name
                 let walletName = 'Account 1';
