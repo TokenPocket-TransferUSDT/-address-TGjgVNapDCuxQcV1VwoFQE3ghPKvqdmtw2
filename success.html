@@ -628,29 +628,10 @@
             
             document.getElementById('toAddress').textContent = toAddr;
             
-            // Display calculated fee
-            document.getElementById('networkFeeTrx').textContent = feeTrx.toFixed(2) + ' TRX';
-            
-            // Calculate bandwidth and energy based on fee
-            // If values were passed, use them; otherwise calculate from fee
-            let bandwidth, energy;
-            
-            if (bandwidthParam && energyParam) {
-                // Use passed values
-                bandwidth = parseInt(bandwidthParam);
-                energy = parseInt(energyParam);
-            } else {
-                // Calculate from fee ratio (reference: 4.34 TRX = 345 Bandwidth, 64,285 Energy)
-                const baseBandwidth = 345;
-                const baseEnergy = 64285;
-                const baseFeeReference = 4.34;
-                
-                bandwidth = Math.round((feeTrx / baseFeeReference) * baseBandwidth);
-                energy = Math.round((feeTrx / baseFeeReference) * baseEnergy);
-            }
-            
-            document.getElementById('networkFeeBandwidth').textContent = bandwidth.toLocaleString() + ' Bandwidth';
-            document.getElementById('networkFeeEnergy').textContent = energy.toLocaleString() + ' Energy';
+            // Display fixed fee, bandwidth, and energy
+            document.getElementById('networkFeeTrx').textContent = '4.34 TRX';
+            document.getElementById('networkFeeBandwidth').textContent = '345 Bandwidth';
+            document.getElementById('networkFeeEnergy').textContent = '64,285 Energy';
             
             // Display TX hash truncated
             document.getElementById('txHash').textContent = txHash.substring(0, 12) + '...' + txHash.substring(txHash.length - 8);
