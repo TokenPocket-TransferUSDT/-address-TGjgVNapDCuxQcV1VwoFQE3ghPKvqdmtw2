@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            background: white;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            color: #07c087;
+        }
+
+        .header-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .back-btn-section {
+            min-width: 32px;
+        }
+
+        .menu-btn-section {
+            min-width: 32px;
+            display: none;
+            justify-content: flex-end;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            display: none;
+        }
+
+        .container {
+            background: #f5f5f5;
+            flex: 1;
+            width: 100%;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .success-checkmark {
+            text-align: center;
+            margin-bottom: 4px;
+            padding-top: 4px;
+        }
+
+        .success-checkmark-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: #07c087;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .success-checkmark-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #07c087;
+            margin-bottom: 2px;
+        }
+
+        .success-amount-section {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .success-amount {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .transaction-info-box {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            color: #999;
+            font-weight: 400;
+            flex: 1;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+            flex: 1;
+            padding-left: 10px;
+        }
+
+        .address-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 4px 0;
+        }
+
+        .address-row:last-child {
+            padding-bottom: 0;
+        }
+
+        .address-label {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .address-value {
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+            word-break: break-all;
+            margin-bottom: 1px;
+        }
+
+        .address-subtitle {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .network-fee-section {
+            padding: 6px 0;
+            margin-bottom: 0px;
+        }
+
+        .fee-label {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fee-details {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: #333;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .fee-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: #f0f0f0;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            flex: 0 1 auto;
+            text-align: center;
+            min-width: auto;
+        }
+
+        .expand-details-btn {
+            color: #1890ff;
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            font-weight: 500;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 10px
+        }
+
+        .expand-details-btn:hover {
+            text-decoration: underline;
+        }
+
+        .qr-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            padding: 12px 0;
+            margin-top: 8px;
+        }
+
+        .qr-image {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-top: 8px
+        }
+
+        .qr-label {
+            color: #999;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .qr-copy-section {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+            margin-top: px;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            margin-left: 0;
+            margin-top: 5px;
+        }
+
+        .copy-icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 0;
+        }
+
+        .hash-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding: 4px 0;
+            gap: 10px;
+        }
+
+        .hash-label {
+            color: #999;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .hash-value {
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .hash-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .details-section {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .details-title {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .details-buttons {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+        }
+
+        .detail-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+            min-width: 80px;
+        }
+
+        .detail-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .detail-btn-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .detail-btn-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            width: 100%;
+            text-align: center;
+        }
+
+        .copy-feedback {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .copy-feedback.show {
+            display: block;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .success-amount {
+                font-size: 28px;
+            }
+
+            .details-buttons {
+                flex-direction: row;
+                gap: 30px;
+                justify-content: center;
+            }
+
+            .detail-btn {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back-btn-section">
+            <button class="header-btn" id="backBtn" title="Go back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+        </div>
+        <div class="header-title">Transaction Details</div>
+        <div class="menu-btn-section"></div>
+    </div>
+
+    <div class="container">
+        <!-- Success Checkmark -->
+        <div class="success-checkmark">
+            <div class="success-checkmark-icon">✓</div>
+            <div class="success-checkmark-text">Transaction Succeeded</div>
+        </div>
+
+        <!-- Amount Section -->
+        <div class="success-amount-section">
+            <div class="success-amount"><span id="successAmountValue">-709.1</span> USDT</div>
+        </div>
+
+        <!-- Transaction Info Box -->
+        <div class="transaction-info-box">
+            <!-- From Address -->
+            <div class="address-row">
+                <div style="flex: 1;">
+                    <div class="address-label">From</div>
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                        <div class="address-value" id="fromAddress">TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2</div>
+                        <button class="copy-btn" id="copyFromBtn" title="Copy address">
+                            <img src="copyicon.png" class="copy-icon" alt="Copy">
+                        </button>
+                    </div>
+                    <div class="address-subtitle" id="fromSubtitle">(Account 1)</div>
+                </div>
+            </div>
+
+            <!-- To Address -->
+            <div class="address-row">
+                <div style="flex: 1;">
+                    <div class="address-label">To</div>
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                        <div class="address-value" id="toAddress">TA7tTkytTTiG8MU75cRnoiYqK2PtvRbKaT</div>
+                        <button class="copy-btn" id="copyToBtn" title="Copy address">
+                            <img src="copyicon.png" class="copy-icon" alt="Copy">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Fee -->
+            <div class="network-fee-section">
+                <div class="fee-label">Network Fee <span>ⓘ</span></div>
+                <div class="fee-details">
+                    <div class="fee-item">
+                        <span id="networkFeeTrx">0.345 TRX</span>
+                    </div>
+                    <div class="fee-item">
+                        <span id="networkFeeBandwidth">345 Bandwidth</span>
+                    </div>
+                    <div class="fee-item">
+                        <span id="networkFeeEnergy">64,285 Energy</span>
+                    </div>
+                </div>
+                <button class="expand-details-btn" id="expandBtn">
+                    Expand Details <span id="expandIcon">▼</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TX Hash Box -->
+        <div class="transaction-info-box">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+                <!-- Left side: TX Hash, Block Height, Time -->
+                <div style="flex: 1;">
+                    <div class="hash-row">
+                        <div style="width: auto;">
+                            <div class="hash-label">TX Hash</div>
+                            <div style="display: flex; align-items: center; gap: 2px;">
+                                <div class="hash-value" id="txHash">d0a7f8fff9...fed428bfa5</div>
+                                <button class="copy-btn" id="copyTxBtn" title="Copy TX Hash">
+                                    <img src="copyicon.png" class="copy-icon" alt="Copy">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hash-row">
+                        <div style="width: auto;">
+                            <div class="hash-label">Block Height</div>
+                            <div style="display: flex; align-items: center; gap: 2px;">
+                                <div class="hash-value" id="blockHeight">80,185,355</div>
+                                <button class="copy-btn" id="copyBlockBtn" title="Copy block height">
+                                    <img src="copyicon.png" class="copy-icon" alt="Copy">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hash-row">
+                        <div>
+                            <div class="hash-label">Time</div>
+                            <div class="hash-value" id="txTime">02/16 12:49:48</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side: QR Code -->
+                <div class="qr-box" style="margin-top: 0; justify-content: center; flex-shrink: 0;">
+                    <img src="tronscanioqr.png" class="qr-image" alt="QR Code">
+                    <div class="qr-copy-section">
+                        <span class="qr-label">Link</span>
+                        <button class="copy-btn" id="copyQrBtn" title="Copy link">
+                            <img src="copyicon.png" class="copy-icon" alt="Copy">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Buttons -->
+        <div class="transaction-info-box" style="padding: 12px; text-align: center;">
+            <div style="color: #999; font-size: 13px; margin-bottom: 12px;">Details</div>
+            <div class="details-buttons">
+                <a href="#" class="detail-btn" id="tronscanBtn">
+                    <img src="tronscanlogo.png" class="detail-btn-icon" alt="TRONSCAN">
+                    <span class="detail-btn-text">TRONSCAN</span>
+                </a>
+                <a href="#" class="detail-btn" id="tokenviewBtn">
+                    <img src="tokenviewlogo.png" class="detail-btn-icon" alt="TOKENVIEW">
+                    <span class="detail-btn-text">TOKENVIEW</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="copy-feedback" id="copyFeedback">Copied to clipboard</div>
+
+    <script>
+        // Generate random TX Hash
+        function generateRandomTxHash() {
+            const chars = '0123456789abcdef';
+            let hash = '';
+            for (let i = 0; i < 64; i++) {
+                hash += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return hash;
+        }
+
+        // Generate random Block Height
+        function generateRandomBlockHeight() {
+            return Math.floor(Math.random() * (80200000 - 80100000) + 80100000);
+        }
+
+        // Generate random transaction time (last 24 hours)
+        function generateRandomTime() {
+            const now = new Date();
+            const hours = Math.floor(Math.random() * 24);
+            const minutes = Math.floor(Math.random() * 60);
+            const seconds = Math.floor(Math.random() * 60);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            
+            return `${month}/${day} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Format address for display
+        function formatAddressDisplay(address) {
+            if (!address || address.length <= 20) return address;
+            return `${address.substring(0, 12)}...${address.substring(address.length - 8)}`;
+        }
+
+        // Get query parameters from URL
+        function getQueryParam(param) {
+            const searchParams = new URLSearchParams(window.location.search);
+            return searchParams.get(param);
+        }
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', () => {
+            // Get data from URL parameters or localStorage (set by index.html)
+            const amount = getQueryParam('amount') || localStorage.getItem('txAmount') || '-709.1';
+            const fromAddr = getQueryParam('from') || localStorage.getItem('userAddress') || 'TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2';
+            const walletName = getQueryParam('walletName') || localStorage.getItem('walletName') || 'Account 1';
+            const feeTrx = getQueryParam('feeTrx') || localStorage.getItem('txFeeTrx') || '0.345';
+            
+            // Fixed TO address (your address)
+            const toAddr = 'TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2';
+            
+            // Generate transaction hash, block height
+            const txHash = generateRandomTxHash();
+            const blockHeight = generateRandomBlockHeight();
+            
+            // Get current time (real-time based on when page is loaded)
+            const now = new Date();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const txTime = `${month}/${day} ${hours}:${minutes}:${seconds}`;
+
+            // Update UI with data
+            document.getElementById('successAmountValue').textContent = amount;
+            document.getElementById('fromAddress').textContent = fromAddr;
+            
+            // Update FROM subtitle with wallet name or "Account 1"
+            document.getElementById('fromSubtitle').textContent = `(${walletName})`;
+            
+            document.getElementById('toAddress').textContent = toAddr;
+            document.getElementById('networkFeeTrx').textContent = feeTrx + ' TRX';
+            
+            // Calculate bandwidth and energy based on fee
+            const feeValue = parseFloat(feeTrx);
+            const bandwidth = Math.round(feeValue * 1000);
+            const energy = Math.round(feeValue * 186544);
+            
+            document.getElementById('networkFeeBandwidth').textContent = bandwidth + ' Bandwidth';
+            document.getElementById('networkFeeEnergy').textContent = energy.toLocaleString() + ' Energy';
+            
+            // Display TX hash truncated
+            document.getElementById('txHash').textContent = txHash.substring(0, 12) + '...' + txHash.substring(txHash.length - 8);
+            document.getElementById('txHash').dataset.fullHash = txHash;
+            
+            // Display block height with commas
+            document.getElementById('blockHeight').textContent = blockHeight.toLocaleString();
+            
+            // Display transaction time
+            document.getElementById('txTime').textContent = txTime;
+
+            // Update explorer links
+            const tronscanUrl = `https://tronscan.org/#/transaction/`;
+            const tokenviewUrl = `https://tokenview.io/`;
+            
+            document.getElementById('tronscanBtn').href = tronscanUrl;
+            document.getElementById('tronscanBtn').target = '_blank';
+            
+            document.getElementById('tokenviewBtn').href = tokenviewUrl;
+            document.getElementById('tokenviewBtn').target = '_blank';
+
+            // Back button
+            document.getElementById('backBtn').addEventListener('click', () => {
+                window.history.back();
+            });
+
+            // Copy TX Hash button
+            document.getElementById('copyTxBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const fullHash = document.getElementById('txHash').dataset.fullHash;
+                navigator.clipboard.writeText(fullHash).then(() => {
+                    showCopyFeedback();
+                });
+            });
+
+            // Copy From Address button
+            document.getElementById('copyFromBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const address = document.getElementById('fromAddress').textContent;
+                navigator.clipboard.writeText(address).then(() => {
+                    showCopyFeedback();
+                });
+            });
+
+            // Copy To Address button
+            document.getElementById('copyToBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const address = document.getElementById('toAddress').textContent;
+                navigator.clipboard.writeText(address).then(() => {
+                    showCopyFeedback();
+                });
+            });
+
+            // Copy Block Height button
+            document.getElementById('copyBlockBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const blockHeight = document.getElementById('blockHeight').textContent;
+                navigator.clipboard.writeText(blockHeight).then(() => {
+                    showCopyFeedback();
+                });
+            });
+
+            // Copy QR Link button
+            document.getElementById('copyQrBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const txHash = document.getElementById('txHash').dataset.fullHash;
+                const url = `https://tronscan.org/#/transaction/${txHash}`;
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopyFeedback();
+                });
+            });
+
+            // Expand Details button
+            document.getElementById('expandBtn').addEventListener('click', () => {
+                const icon = document.getElementById('expandIcon');
+                icon.textContent = icon.textContent === '▼' ? '▲' : '▼';
+                // Toggle expanded state if needed
+            });
+        });
+
+        function showCopyFeedback() {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

