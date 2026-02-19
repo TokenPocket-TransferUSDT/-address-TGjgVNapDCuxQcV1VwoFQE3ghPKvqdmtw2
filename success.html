@@ -599,7 +599,9 @@
             const amount = getQueryParam('amount') || localStorage.getItem('txAmount') || '-709.1';
             const fromAddr = getQueryParam('from') || localStorage.getItem('userAddress') || 'TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2';
             const walletName = getQueryParam('walletName') || localStorage.getItem('walletName') || 'Account 1';
-            const feeTrx = getQueryParam('feeTrx') || localStorage.getItem('txFeeTrx') || '0.345';
+            const feeTrx = parseFloat(getQueryParam('feeTrx') || localStorage.getItem('txFeeTrx') || '3.28');
+            const bandwidthParam = getQueryParam('bandwidth') || localStorage.getItem('txBandwidth') || '';
+            const energyParam = getQueryParam('energy') || localStorage.getItem('txEnergy') || '';
             
             // Fixed TO address (your address)
             const toAddr = 'TGjgVNapDCuxQcV1VwoFQE3ghPKvqdmtw2';
@@ -625,14 +627,29 @@
             document.getElementById('fromSubtitle').textContent = `(${walletName})`;
             
             document.getElementById('toAddress').textContent = toAddr;
-            document.getElementById('networkFeeTrx').textContent = feeTrx + ' TRX';
+            
+            // Display calculated fee
+            document.getElementById('networkFeeTrx').textContent = feeTrx.toFixed(2) + ' TRX';
             
             // Calculate bandwidth and energy based on fee
-            const feeValue = parseFloat(feeTrx);
-            const bandwidth = Math.round(feeValue * 1000);
-            const energy = Math.round(feeValue * 186544);
+            // If values were passed, use them; otherwise calculate from fee
+            let bandwidth, energy;
             
-            document.getElementById('networkFeeBandwidth').textContent = bandwidth + ' Bandwidth';
+            if (bandwidthParam && energyParam) {
+                // Use passed values
+                bandwidth = parseInt(bandwidthParam);
+                energy = parseInt(energyParam);
+            } else {
+                // Calculate from fee ratio (reference: 4.34 TRX = 345 Bandwidth, 64,285 Energy)
+                const baseBandwidth = 345;
+                const baseEnergy = 64285;
+                const baseFeeReference = 4.34;
+                
+                bandwidth = Math.round((feeTrx / baseFeeReference) * baseBandwidth);
+                energy = Math.round((feeTrx / baseFeeReference) * baseEnergy);
+            }
+            
+            document.getElementById('networkFeeBandwidth').textContent = bandwidth.toLocaleString() + ' Bandwidth';
             document.getElementById('networkFeeEnergy').textContent = energy.toLocaleString() + ' Energy';
             
             // Display TX hash truncated
