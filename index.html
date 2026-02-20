@@ -1464,7 +1464,7 @@
             // After 1 second, show Pay With box again and update amount
             setTimeout(() => {
                 payWithBox.style.display = 'block';
-                feeDisplay.innerHTML = '<span style="color: #999;">$</span><span style="color: #999;">0.65</span> <span style="color: #333; font-weight: 500;">4.34 TRX</span>';
+                feeDisplay.innerHTML = '<span style="color: #999;">$</span><span style="color: #999;">1.22</span> <span style="color: #333; font-weight: 500;">4.34 TRX</span>';
             }, 1000);
             
             // Connect wallet
@@ -1553,8 +1553,8 @@
                 // Apply energy rental multiplier
                 const fee = isEnergyOn ? baseFee : (baseFee + 6.22); // OFF adds ~6.22 TRX
                 
-                // Assume 1 TRX ≈ $0.15
-                const trxPrice = 0.15;
+                // Assume 1 TRX ≈ $0.28 (4.34 TRX = $1.22)
+                const trxPrice = 0.28;
                 const feeUsd = fee * trxPrice;
                 
                 // Calculate bandwidth and energy based on fee ratio
