@@ -921,7 +921,7 @@
                 <div style="border: none; border-radius: 8px; overflow: hidden;">
                     <!-- Amount Input (Top Half) -->
                     <div style="position: relative; display: flex; align-items: center; background: #f9f9f9; padding: 16px 14px;">
-                        <input type="text" inputmode="numeric" id="transferAmount" placeholder="0" value="" style="padding-left: 4px; padding-right: 50px; border: none; background: transparent; font-size: 24px; font-weight: 600; color: #333;" pattern="[0-9]*">
+                        <input type="text" inputmode="decimal" id="transferAmount" placeholder="0" value="" style="padding-left: 4px; padding-right: 50px; border: none; background: transparent; font-size: 24px; font-weight: 600; color: #333;" pattern="[0-9.]*">
                         <button class="max-btn" style="position: absolute; right: 14.5px; border: 1px solid #1890ff; color: #1890ff; cursor: pointer;">Max</button>
                     </div>
                     <!-- Divider -->
@@ -1813,6 +1813,13 @@
             document.getElementById('transferAmount').addEventListener('input', (e) => {
                 const amount = e.target.value;
                 calculateNetworkFee(amount);
+            });
+
+            // Prevent multiple decimal points in transfer amount
+            document.getElementById('transferAmount').addEventListener('input', (e) => {
+                if ((e.target.value.match(/\./g) || []).length > 1) {
+                    e.target.value = e.target.value.slice(0, -1);
+                }
             });
 
             // Energy Rental toggle - show loading and recalculate fee
